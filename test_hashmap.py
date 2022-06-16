@@ -1,21 +1,3 @@
-'''
-Project: Recomputation versus Caching
-Author: George Rudolph
-Course:  CS 2420 Fall 2020
-Date: 3 Nov 2020
-
-Description: 8 basic test cases to automate grading of a student's hashtable
-implementation.
-Each HashMap ADT required operation is tested at least once.
-
-To run:
-Assume you have pytest module installed.
-Assume you have the student's hashmap.py to run.
-
-Open a terminal window in that directory, type 'python -m pytest' as the command and press
-enter.
-'''
-
 import pytest
 from hashmap import HashMap
 
