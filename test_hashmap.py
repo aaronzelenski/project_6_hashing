@@ -1,5 +1,5 @@
 import pytest
-from hashmap import HashMap
+from HashMap import HashMap
 
 def test_empty_map():
     hm = HashMap()
@@ -64,7 +64,7 @@ def test_rehashing():
 def test_code_quality():
     from pylint.lint import Run
 
-    results = Run(['hashmap.py'], exit=False)
+    results = Run(['HashMap.py'], exit=False)
     expected = 8.5
     actual = results.linter.stats['global_note']
     assert actual >= expected

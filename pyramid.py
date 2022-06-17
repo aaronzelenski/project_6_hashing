@@ -1,82 +1,88 @@
+"""file holds all pyramid functions"""
 import sys
-import time
 from time import perf_counter
+from HashMap import HashMap
 
-PYRAMID_DEPTH = 23
-global call_counter, cache_hits
-call_counter = 0
-cache_hits = 0
+PYRAMID_DEPTH = 7
+global CALL_COUNTER, CACHE_HITS
+CALL_COUNTER = 0
+CACHE_HITS = 0
 
-global dictionary
-dictionary = {}
-for i in range(0, PYRAMID_DEPTH):
-    for j in range(0, PYRAMID_DEPTH + 1):
-        dictionary[(i, j)] = -1.0
+global DICTIONARY
+DICTIONARY = {}
 
 
-def weight_on_with_dict(r, c):
+def weight_on_with_dict(row, column):
+    """routine used to calculate the weight on each individual using dictionary"""
+
     weight_const = 200
-    global call_counter, cache_hits, dictionary
-    call_counter += 1
+    global CALL_COUNTER, CACHE_HITS, DICTIONARY
+    CALL_COUNTER += 1
 
-    if dictionary[(r, c)] != -1:
-        cache_hits += 1
-        return dictionary[(r, c)]
+    if DICTIONARY[(row, column)] != -1:
+        CACHE_HITS += 1
+        return DICTIONARY[(row, column)]
 
     # case 1 top of tree
-    if r == 0 and c == 0:
+    if row == 0 and column == 0:
         weight = 0.0
-        dictionary[(r, c)] = weight
+        DICTIONARY[(row, column)] = weight
         return weight
 
     # case 2 left-hand side
-    elif c == 0:
-        weight = (weight_const + weight_on(r - 1, c)) / 2
-        dictionary[(r, c)] = weight
+    if column == 0:
+        weight = (weight_const + weight_on_with_dict(row - 1, column)) / 2
+        DICTIONARY[(row, column)] = weight
         return weight
 
     # case 3 right_hand side
-    elif r == c:
-        weight = (weight_const + weight_on(r - 1, c - 1)) / 2
-        dictionary[(r, c)] = weight
+    if row == column:
+        weight = (weight_const + weight_on_with_dict(row - 1, column - 1)) / 2
+        DICTIONARY[(row, column)] = weight
         return weight
 
     # case 4 everything else
-    else:
-        weight = (weight_const + weight_const + weight_on(r - 1, c-1) + weight_on(r-1, c)) / 2
-        dictionary[(r, c)] = weight
-        return weight
+    weight = (weight_const + weight_const + weight_on_with_dict(row - 1, column - 1)
+              + weight_on_with_dict(row - 1, column)) / 2
+    DICTIONARY[(row, column)] = weight
+    return weight
 
 
-def weight_on(r, c):
+def weight_on(row, column):
+    """routine used to calculate the weight on each individual"""
     weight_const = 200
-    global call_counter
-    call_counter += 1
+    global CALL_COUNTER
+    CALL_COUNTER += 1
 
     # case 1 top of tree
-    if r == 0 and c == 0:
+    if row == 0 and column == 0:
         return 0.0
 
     # case 2 left-hand side
-    elif c == 0:
-        weight = (weight_const + weight_on(r - 1, c)) / 2
+    if column == 0:
+        weight = (weight_const + weight_on(row - 1, column)) / 2
         return weight
 
     # case 3 right_hand side
-    elif r == c:
-        weight = (weight_const + weight_on(r - 1, c - 1)) / 2
+    if row == column:
+        weight = (weight_const + weight_on(row - 1, column - 1)) / 2
         return weight
 
     # case 4 everything else
-    else:
-        weight = (weight_const + weight_const + weight_on(r - 1, c-1) + weight_on(r-1, c)) / 2
-        return weight
+    weight = (weight_const + weight_const + weight_on(row - 1, column - 1)
+              + weight_on(row - 1, column)) / 2
+    return weight
 
 
-def print_the_weight_calculations_with_dictionary():
-    global call_counter, dictionary, cache_hits
-    call_counter = 0
-    cache_hits = 0
+def print_the_weight_pyramid_with_dictionary():
+    """print weight pyramid using dictionary"""
+    global CALL_COUNTER, DICTIONARY, CACHE_HITS
+    CALL_COUNTER = 0
+    CACHE_HITS = 0
+
+    for i in range(0, PYRAMID_DEPTH):
+        for j in range(0, PYRAMID_DEPTH + 1):
+            DICTIONARY[(i, j)] = -1.0
 
     for i in range(0, PYRAMID_DEPTH):
         print(" ")
@@ -85,8 +91,9 @@ def print_the_weight_calculations_with_dictionary():
 
 
 def print_weight_pyramid():
-    global call_counter, PYRAMID_DEPTH
-    call_counter = 0
+    """print weight pyramid """
+    global CALL_COUNTER, PYRAMID_DEPTH
+    CALL_COUNTER = 0
     for i in range(0, PYRAMID_DEPTH):
         print("")
         for j in range(0, i + 1):
@@ -94,27 +101,34 @@ def print_weight_pyramid():
 
 
 def write_the_weight_calculations_to_a_file():
-    global call_counter
-    call_counter = 0
-    f = open("part2.txt", "a")
+    """writing the pyramid to part2.txt file"""
+    global CALL_COUNTER
+    CALL_COUNTER = 0
+    file = open("part2.txt", "a")
 
     for i in range(0, PYRAMID_DEPTH):
-        f.write("\n")
+        file.write("\n")
         for j in range(0, i + 1):
-            f.write("{:6.2f} ".format(weight_on(i, j)))
+            file.write("{:6.2f} ".format(weight_on(i, j)))
     start = perf_counter()
-    print_weight_pyramid()
+    print_the_weight_pyramid_with_dictionary()
     end = perf_counter()
-    f.write(" ")
-    f.write(f"\nElapsed time {end - start} seconds")
-    f.write(f"\nNumber of function calls : {call_counter}")
-    f.close()
+    file.write(" ")
+    file.write(f"\nElapsed time {end - start} seconds")
+    file.write(f"\nNumber of function calls : {CALL_COUNTER}")
+    file.write(f"\nNumber of cache hits : {CACHE_HITS}")
+    file.close()
 
 
 def run_the_weight_calculations():
-    global call_counter, cache_hits
-    call_counter = 0
-    cache_hits = 0
+    """weight calc not using dict"""
+    for i in range(0, PYRAMID_DEPTH):
+        for j in range(0, PYRAMID_DEPTH + 1):
+            DICTIONARY[(i, j)] = -1.0
+
+    global CALL_COUNTER, CACHE_HITS
+    CALL_COUNTER = 0
+    CACHE_HITS = 0
     for i in range(0, PYRAMID_DEPTH):
         for j in range(0, i + 1):
             if i == 0:
@@ -126,9 +140,13 @@ def run_the_weight_calculations():
 
 
 def run_the_weight_calculations_with_dictionary():
-    global call_counter, cache_hits, dictionary
-    call_counter = 0
-    cache_hits = 0
+    """weight calc using dict"""
+    global CALL_COUNTER, CACHE_HITS, DICTIONARY
+    for i in range(0, PYRAMID_DEPTH):
+        for j in range(0, PYRAMID_DEPTH + 1):
+            DICTIONARY[(i, j)] = -1.0
+    CALL_COUNTER = 0
+    CACHE_HITS = 0
 
     for i in range(0, PYRAMID_DEPTH):
         for j in range(0, i + 1):
@@ -144,14 +162,6 @@ if __name__ == '__main__':
     if len(sys.argv) != 1:
         PYRAMID_DEPTH = int(sys.argv[1])
 
+MyHashMap = HashMap
 
-start_timer = time.perf_counter()
-run_the_weight_calculations_with_dictionary()
-end_timer = time.perf_counter()
-print_the_weight_calculations_with_dictionary()
-elapsed_time = end_timer - start_timer
-print()
-print()
-print(f"Elapsed time: {elapsed_time} seconds")
-print(f"Function calls: {call_counter}")
-print(f"Number of cache hits: {cache_hits}")
+write_the_weight_calculations_to_a_file()
